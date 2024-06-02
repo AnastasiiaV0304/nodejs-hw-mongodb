@@ -22,22 +22,25 @@ export const setupServer = () => {
     }),
   );
 
-  app.get('/contacts', async (req, res) => {
-    try {
-      const contacts = await getAllContacts();
+  const asyncHandler = (fn) => (req, res, next) => {
+    Promise.resolve(fn(req, res, next)).catch(next);
+  };
 
+  app.get(
+    '/contacts',
+    asyncHandler(async (req, res) => {
+      const contacts = await getAllContacts();
       res.status(200).json({
         status: 200,
         message: 'Successfully found contacts!',
         data: contacts,
       });
-    } catch (error) {
-      console.log('Something went wrong', error);
-    }
-  });
+    }),
+  );
 
-  app.get('/contacts/:contactId', async (req, res) => {
-    try {
+  app.get(
+    '/contacts/:contactId',
+    asyncHandler(async (req, res) => {
       const contactId = req.params.contactId;
       if (!mongoose.Types.ObjectId.isValid(contactId)) {
         throw new Error('Invalid contact ID');
@@ -58,14 +61,8 @@ export const setupServer = () => {
         message: `Successfully found contact with id ${contactId}!`,
         data: contact,
       });
-    } catch (error) {
-      console.log('Contact not found!', error);
-      res.status(404).json({
-        status: 404,
-        message: 'Contact not found',
-      });
-    }
-  });
+    }),
+  );
 
   app.use('*', (req, res) => {
     res.status(404).json({
@@ -73,7 +70,8 @@ export const setupServer = () => {
     });
   });
 
-  app.use((err, req, res) => {
+  app.use((err, req, res, next) => {
+    console.error('Something went wrong', err);
     res.status(500).json({
       message: 'Something went wrong',
       error: err.message,
