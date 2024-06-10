@@ -11,6 +11,9 @@ export const getContactById = async (contactId) => {
 };
 
 export const createContact = async (payload) => {
+  if (Object.prototype.hasOwnProperty.call(payload, '_V')) {
+    delete payload['_V'];
+  }
   const contact = await ContactsCollection.create(payload);
   return contact;
 };
