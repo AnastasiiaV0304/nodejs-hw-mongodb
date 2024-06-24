@@ -19,14 +19,14 @@ const router = Router();
 
 router.use(authenticate);
 
-router.get('/contacts', ctrlWrapper(getAllContactsController));
+router.get('/', ctrlWrapper(getAllContactsController));
 router.get(
   '/contacts/:contactId',
   isValidId('contactId'),
   ctrlWrapper(getContactByIdController),
 );
 router.post(
-  '/',
+  '',
   validateBody(createContactSchema),
   ctrlWrapper(createContactController),
 );
