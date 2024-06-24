@@ -26,11 +26,12 @@ router.get(
   ctrlWrapper(getContactByIdController),
 );
 router.post(
-  '',
+  '/',
   validateBody(createContactSchema),
   ctrlWrapper(createContactController),
 );
 router.delete('/contacts/:contactId', ctrlWrapper(deleteContactController));
+
 router.patch(
   '/contacts/:contactId',
   isValidId('contactId'),
