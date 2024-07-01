@@ -28,8 +28,8 @@ router.get(
 );
 router.post(
   '/',
-  validateBody(createContactSchema),
   upload.single('photo'),
+  validateBody(createContactSchema),
   ctrlWrapper(createContactController),
 );
 router.delete('/contacts/:contactId', ctrlWrapper(deleteContactController));
@@ -37,8 +37,8 @@ router.delete('/contacts/:contactId', ctrlWrapper(deleteContactController));
 router.patch(
   '/:contactId',
   isValidId('contactId'),
-  validateBody(updateContactSchema),
   upload.single('photo'),
+  validateBody(updateContactSchema),
   ctrlWrapper(patchContactController),
 );
 
