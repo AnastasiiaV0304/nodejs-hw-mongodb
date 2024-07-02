@@ -94,21 +94,15 @@ export const upsertContactController = async (req, res, next) => {
     const { contactId } = req.params;
     const userId = req.user._id;
 
-    console.log('Request Parameters - contactId:', contactId);
-    console.log('Request User ID:', userId);
-    console.log('Request Body:', req.body);
-
     const result = await updateContact(
       contactId,
       { ...req.body, userId },
       { upsert: true },
     );
 
-    console.log('Update Contact Result:', result);
-
     if (!result) {
-      console.log('Contact not found');
-      return next(createHttpError(404, 'Contact not found'));
+      next(createHttpError(404, 'Contact not found'));
+      return;
     }
 
     const status = result.isNew ? 201 : 200;
@@ -119,7 +113,6 @@ export const upsertContactController = async (req, res, next) => {
       data: result.contact,
     });
   } catch (error) {
-    console.error('Error in upsertContactController:', error);
     next(error);
   }
 };
