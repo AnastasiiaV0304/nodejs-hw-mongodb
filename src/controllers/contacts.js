@@ -94,26 +94,22 @@ export const upsertContactController = async (req, res, next) => {
     const { contactId } = req.params;
     const userId = req.user._id;
 
-    // Логування параметрів
-    console.log('Contact ID:', contactId);
-    console.log('User ID:', userId);
-
-    const result = await updateContact(contactId, req.body, userId, {
-      upsert: true,
-    });
-
-    // Логування результату updateContact
-    console.log('Update Contact Result:', result);
+    const result = await updateContact(
+      contactId,
+      { ...req.body, userId },
+      { upsert: true },
+    );
 
     if (!result) {
-      return next(createHttpError(404, 'Contact not found'));
+      next(createHttpError(404, 'Contact not found'));
+      return;
     }
 
     const status = result.isNew ? 201 : 200;
 
     res.status(status).json({
       status,
-      message: 'Successfully upserted a contact!',
+      message: `Successfully upserted a contact!`,
       data: result.contact,
     });
   } catch (error) {
