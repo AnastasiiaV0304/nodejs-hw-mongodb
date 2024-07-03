@@ -90,27 +90,31 @@ export const deleteContactController = async (req, res, next) => {
 };
 
 export const upsertContactController = async (req, res, next) => {
-  const { contactId } = req.params;
-  const userId = req.user._id;
+  try {
+    const { contactId } = req.params;
+    const userId = req.user._id;
 
-  const result = await updateContact(
-    contactId,
-    { ...req.body, userId },
-    { upsert: true },
-  );
+    const result = await updateContact(
+      contactId,
+      { ...req.body, userId },
+      { upsert: true },
+    );
 
-  if (!result) {
-    next(createHttpError(404, 'Contact not found'));
-    return;
+    if (!result) {
+      next(createHttpError(404, 'Contact not found'));
+      return;
+    }
+
+    const status = result.isNew ? 201 : 200;
+
+    res.status(status).json({
+      status,
+      message: `Successfully upserted a contact!`,
+      data: result.contact,
+    });
+  } catch (error) {
+    next(error);
   }
-
-  const status = result.isNew ? 201 : 200;
-
-  res.status(status).json({
-    status,
-    message: `Successfully upserted a contact!`,
-    data: result.contact,
-  });
 };
 
 export const patchContactController = async (req, res, next) => {
@@ -118,23 +122,35 @@ export const patchContactController = async (req, res, next) => {
   const userId = req.user._id;
   const photo = req.file;
 
+  if (!contactId) {
+    console.log('Contact ID is missing');
+    next(createHttpError(400, 'Contact ID is required'));
+    return;
+  }
+
   let photoUrl;
 
   if (photo) {
-    if (env('ENABLE_CLOUDINARY') === 'true') {
+    console.log('Photo received');
+    if (process.env.ENABLE_CLOUDINARY === 'true') {
       photoUrl = await saveFileToCloudinary(photo);
     } else {
       photoUrl = await saveFileToUploadDir(photo);
     }
   }
 
-  const result = await updateContact(contactId, {
-    ...req.body,
-    photo: photoUrl,
+  const result = await updateContact(
+    contactId,
+    {
+      ...req.body,
+      photo: photoUrl,
+      userId,
+    },
     userId,
-  });
+  );
 
   if (!result) {
+    console.log('Contact not found');
     next(createHttpError(404, 'Contact not found'));
     return;
   }
